@@ -320,6 +320,8 @@
     margin-bottom: 12px;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
+    user-select: none;
   }
   .now-card::before {
     content: '';
@@ -460,6 +462,45 @@
   .speed-btn:hover { border-color: var(--accent); color: var(--accent); }
   .speed-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
 
+  .custom-play-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.15s;
+  }
+  .custom-play-btn:hover { opacity: 0.8; }
+
+  .custom-progress-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    min-width: 100px;
+  }
+  .custom-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    width: 0%;
+    pointer-events: none;
+    transition: width 0.1s linear;
+  }
+  .custom-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   .flash-overlay {
     position: fixed; inset: 0;
     background: rgba(192,132,252,0.07);
@@ -551,10 +592,13 @@
 
 <!-- STEP 4: TAGGING -->
 <div class="tagging-stage" id="step4">
-  <div class="card" style="padding:12px 20px; margin-bottom:12px;">
+  <div class="card" style="padding:14px 20px; margin-bottom:12px;">
     <div class="audio-row">
-      <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;white-space:nowrap;">▶ 播放</span>
-      <audio id="player2" controls style="flex:1;min-width:200px;height:34px;"></audio>
+      <button class="custom-play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+      <div class="custom-progress-wrap" id="progress-wrap" onclick="seekAudio(event)">
+        <div class="custom-progress-bar" id="audio-progress"></div>
+      </div>
+      <span class="custom-time" id="audio-time">0:00 / 0:00</span>
       <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
         <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em;">速度</span>
         <button class="speed-btn" id="speed-05" onclick="setSpeed(0.5)">0.5×</button>
@@ -562,6 +606,7 @@
         <button class="speed-btn active" id="speed-1" onclick="setSpeed(1)">1×</button>
       </div>
     </div>
+    <audio id="player2" style="display:none;"></audio>
   </div>
 
   <div class="progress-track">
@@ -578,13 +623,13 @@
     </div>
 
     <div class="current-block">
-      <div class="block-label">▶ 当前句 — 唱完按 Enter 打点</div>
+      <div class="block-label">▶ 当前句 — 唱完按 J 打点</div>
       <div class="current-en" id="current-en">—</div>
       <div class="current-zh" id="current-zh">—</div>
     </div>
 
     <div class="key-hint">
-      按 <span class="key" id="enter-key">Enter</span> 标记当前句开始时间
+      按 <span class="key" id="enter-key">J</span> 标记当前句开始时间
       &nbsp;·&nbsp; 空格 = 播放 / 暂停
     </div>
   </div>
@@ -772,8 +817,11 @@ ${zh}
     timestamps = []; currentLine = 0; isTagging = true;
     player2.src = audioSrc;
     player2.playbackRate = 1;
-    // Auto-blur player2 when it starts playing so Enter/Space don't trigger buttons
-    player2.addEventListener('play', () => { setTimeout(() => document.body.focus(), 50); }, { once: false });
+    // Update custom player UI
+    player2.addEventListener('timeupdate', updatePlayerUI);
+    player2.addEventListener('ended', () => {
+      document.getElementById('play-btn').textContent = '▶';
+    });
     document.getElementById('step3').style.display = 'none';
     document.getElementById('step4').classList.add('active');
     document.getElementById('timeline').innerHTML = '<div class="tl-placeholder">打轴记录将显示在这里</div>';
@@ -782,12 +830,42 @@ ${zh}
     updateDisplay();
   }
 
+  function togglePlay() {
+    if (player2.paused) {
+      player2.play();
+      document.getElementById('play-btn').textContent = '⏸';
+    } else {
+      player2.pause();
+      document.getElementById('play-btn').textContent = '▶';
+    }
+  }
+
+  function updatePlayerUI() {
+    const cur = player2.currentTime;
+    const dur = player2.duration || 0;
+    if (dur) {
+      document.getElementById('audio-progress').style.width = `${(cur / dur) * 100}%`;
+    }
+    document.getElementById('audio-time').textContent = `${fmtMin(cur)} / ${fmtMin(dur)}`;
+  }
+
+  function fmtMin(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${String(sec).padStart(2,'0')}`;
+  }
+
+  function seekAudio(e) {
+    const wrap = document.getElementById('progress-wrap');
+    const ratio = e.offsetX / wrap.offsetWidth;
+    player2.currentTime = ratio * (player2.duration || 0);
+  }
+
   function setSpeed(rate) {
     player2.playbackRate = rate;
     ['speed-05','speed-075','speed-1'].forEach(id => document.getElementById(id).classList.remove('active'));
     const map = { 0.5: 'speed-05', 0.75: 'speed-075', 1: 'speed-1' };
     document.getElementById(map[rate]).classList.add('active');
-    document.body.focus();
   }
 
   function updateDisplay() {
@@ -857,12 +935,13 @@ ${zh}
   }
 
   document.addEventListener('keydown', function(e) {
-    if (e.code === 'Enter' && isTagging) {
+    if (!isTagging) return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      togglePlay();
+    } else if (e.code === 'KeyJ') {
       const tag = document.activeElement.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      // If audio element has focus, blur it and mark
-      if (tag === 'AUDIO') { document.activeElement.blur(); }
-      if (tag === 'BUTTON') return;
       e.preventDefault();
       markTimestamp();
     }
@@ -896,6 +975,9 @@ ${zh}
     if (!confirm('重新打轴？时间戳将清除。')) return;
     timestamps = []; currentLine = 0; isTagging = false;
     player2.pause(); player2.currentTime = 0;
+    document.getElementById('play-btn').textContent = '▶';
+    document.getElementById('audio-progress').style.width = '0%';
+    document.getElementById('audio-time').textContent = '0:00 / 0:00';
     document.getElementById('step4').classList.remove('active');
     document.getElementById('step3').style.display = 'block';
     document.getElementById('export-btn').disabled = true;
