@@ -445,6 +445,21 @@
   }
   .undo-btn:hover { border-color: var(--danger); color: var(--danger); }
 
+  .speed-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.05em;
+  }
+  .speed-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .speed-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+
   .flash-overlay {
     position: fixed; inset: 0;
     background: rgba(192,132,252,0.07);
@@ -538,8 +553,14 @@
 <div class="tagging-stage" id="step4">
   <div class="card" style="padding:12px 20px; margin-bottom:12px;">
     <div class="audio-row">
-      <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;white-space:nowrap;">▶ 播放控制</span>
+      <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;white-space:nowrap;">▶ 播放</span>
       <audio id="player2" controls style="flex:1;min-width:200px;height:34px;"></audio>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em;">速度</span>
+        <button class="speed-btn" id="speed-05" onclick="setSpeed(0.5)">0.5×</button>
+        <button class="speed-btn" id="speed-075" onclick="setSpeed(0.75)">0.75×</button>
+        <button class="speed-btn active" id="speed-1" onclick="setSpeed(1)">1×</button>
+      </div>
     </div>
   </div>
 
@@ -550,16 +571,16 @@
   <div class="now-card" id="now-card">
     <div class="line-badge" id="line-badge">1 / ?</div>
 
-    <div class="current-block">
-      <div class="block-label">▶ 当前句</div>
-      <div class="current-en" id="current-en">—</div>
-      <div class="current-zh" id="current-zh">—</div>
+    <div class="next-block" id="prev-block" style="display:none">
+      <div class="block-label">上一句（已打点）</div>
+      <div class="next-en" id="prev-en">—</div>
+      <div class="next-zh" id="prev-zh">—</div>
     </div>
 
-    <div class="next-block" id="next-block">
-      <div class="block-label">下一句</div>
-      <div class="next-en" id="next-en">—</div>
-      <div class="next-zh" id="next-zh">—</div>
+    <div class="current-block">
+      <div class="block-label">▶ 当前句 — 唱完按 Enter 打点</div>
+      <div class="current-en" id="current-en">—</div>
+      <div class="current-zh" id="current-zh">—</div>
     </div>
 
     <div class="key-hint">
@@ -750,12 +771,23 @@ ${zh}
   function startTagging() {
     timestamps = []; currentLine = 0; isTagging = true;
     player2.src = audioSrc;
+    player2.playbackRate = 1;
+    // Auto-blur player2 when it starts playing so Enter/Space don't trigger buttons
+    player2.addEventListener('play', () => { setTimeout(() => document.body.focus(), 50); }, { once: false });
     document.getElementById('step3').style.display = 'none';
     document.getElementById('step4').classList.add('active');
     document.getElementById('timeline').innerHTML = '<div class="tl-placeholder">打轴记录将显示在这里</div>';
     document.getElementById('export-btn').disabled = true;
     setStep(4);
     updateDisplay();
+  }
+
+  function setSpeed(rate) {
+    player2.playbackRate = rate;
+    ['speed-05','speed-075','speed-1'].forEach(id => document.getElementById(id).classList.remove('active'));
+    const map = { 0.5: 'speed-05', 0.75: 'speed-075', 1: 'speed-1' };
+    document.getElementById(map[rate]).classList.add('active');
+    document.body.focus();
   }
 
   function updateDisplay() {
@@ -765,18 +797,18 @@ ${zh}
       document.getElementById('current-en').textContent = enLines[currentLine];
       document.getElementById('current-zh').textContent = zhLines[currentLine];
       document.getElementById('progress-fill').style.width = `${(currentLine / total) * 100}%`;
-      if (currentLine + 1 < total) {
-        document.getElementById('next-block').style.display = 'block';
-        document.getElementById('next-en').textContent = enLines[currentLine + 1];
-        document.getElementById('next-zh').textContent = zhLines[currentLine + 1];
+      if (currentLine > 0) {
+        document.getElementById('prev-block').style.display = 'block';
+        document.getElementById('prev-en').textContent = enLines[currentLine - 1];
+        document.getElementById('prev-zh').textContent = zhLines[currentLine - 1];
       } else {
-        document.getElementById('next-block').style.display = 'none';
+        document.getElementById('prev-block').style.display = 'none';
       }
     } else {
       document.getElementById('line-badge').textContent = '完成 ✓';
       document.getElementById('current-en').textContent = '所有句子已打点';
       document.getElementById('current-zh').textContent = '点下方按钮导出 .srt';
-      document.getElementById('next-block').style.display = 'none';
+      document.getElementById('prev-block').style.display = 'none';
       document.getElementById('progress-fill').style.width = '100%';
       document.getElementById('export-btn').disabled = false;
       isTagging = false;
@@ -825,10 +857,12 @@ ${zh}
   }
 
   document.addEventListener('keydown', function(e) {
-    if (e.code === 'Enter' && isTagging &&
-        document.activeElement.tagName !== 'INPUT' &&
-        document.activeElement.tagName !== 'TEXTAREA' &&
-        document.activeElement.tagName !== 'BUTTON') {
+    if (e.code === 'Enter' && isTagging) {
+      const tag = document.activeElement.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      // If audio element has focus, blur it and mark
+      if (tag === 'AUDIO') { document.activeElement.blur(); }
+      if (tag === 'BUTTON') return;
       e.preventDefault();
       markTimestamp();
     }
