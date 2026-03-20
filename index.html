@@ -509,6 +509,22 @@
     transition: opacity 0.05s;
   }
   .flash-overlay.flash { opacity: 1; }
+
+  .detect-banner {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    background: #1a1a2e;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .detect-banner.visible { display: flex; }
+  .detect-banner-text { flex: 1; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.05em; }
+  .detect-banner-text span { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -530,6 +546,11 @@
 
 <!-- STEP 1: LYRICS INPUT -->
 <div id="step1">
+  <div id="detect-banner" class="detect-banner">
+    <div class="detect-banner-text">✦ 检测到<span>双语交替格式</span>，自动拆分到两列？</div>
+    <button class="btn btn-primary" style="padding:6px 14px;font-size:10px;" onclick="splitBilingual()">拆分</button>
+    <button class="btn btn-outline" style="padding:6px 14px;font-size:10px;" onclick="dismissBanner()">忽略</button>
+  </div>
   <div class="card">
     <div class="card-title">Step 01 · 输入歌词</div>
     <div class="card-desc">在左侧粘贴原文歌词，每行一句。中文部分有两种方式：已有满意译文直接粘贴，行数不需要与原文对齐；没有译文则点「AI 翻译」自动生成。</div>
@@ -658,6 +679,47 @@
     return text.split('\n').filter(l => l.trim() !== '').join('\n');
   }
 
+  function isChinese(str) {
+    return /[\u4e00-\u9fff\u3400-\u4dbf]/.test(str);
+  }
+
+  function isBilingualAlternating(lines) {
+    if (lines.length < 4) return false;
+    let matches = 0;
+    const pairs = Math.floor(lines.length / 2);
+    for (let i = 0; i < pairs * 2; i += 2) {
+      const isEnForeign = !isChinese(lines[i]);
+      const isZhLine = isChinese(lines[i + 1]);
+      if (isEnForeign && isZhLine) matches++;
+    }
+    return matches / pairs >= 0.8;
+  }
+
+  function checkBilingual() {
+    const raw = document.getElementById('en-input').value;
+    const lines = raw.split('\n').filter(l => l.trim());
+    if (isBilingualAlternating(lines)) {
+      document.getElementById('detect-banner').classList.add('visible');
+    }
+  }
+
+  function splitBilingual() {
+    const lines = document.getElementById('en-input').value.split('\n').filter(l => l.trim());
+    const enArr = [], zhArr = [];
+    for (let i = 0; i < lines.length; i += 2) {
+      enArr.push(lines[i]);
+      if (lines[i + 1]) zhArr.push(lines[i + 1]);
+    }
+    document.getElementById('en-input').value = enArr.join('\n');
+    document.getElementById('zh-input').value = zhArr.join('\n');
+    dismissBanner();
+    updateCounts();
+  }
+
+  function dismissBanner() {
+    document.getElementById('detect-banner').classList.remove('visible');
+  }
+
   function updateCounts() {
     const en = stripBlankLines(document.getElementById('en-input').value).split('\n').filter(l => l.trim());
     const zh = stripBlankLines(document.getElementById('zh-input').value).split('\n').filter(l => l.trim());
@@ -679,13 +741,14 @@
     document.getElementById('confirm-lyrics-btn').disabled = !(hasEn && hasZh && en.length === zh.length);
   }
 
-  // Auto-strip blank lines on blur
+  // Auto-strip blank lines on blur, check bilingual on paste
   document.getElementById('en-input').addEventListener('blur', function() {
     const stripped = stripBlankLines(this.value);
     if (stripped !== this.value) {
       this.value = stripped;
       updateCounts();
     }
+    checkBilingual();
   });
   document.getElementById('en-input').addEventListener('input', updateCounts);
   document.getElementById('zh-input').addEventListener('input', updateCounts);
