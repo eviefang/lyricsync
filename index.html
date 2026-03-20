@@ -553,16 +553,15 @@
   </div>
   <div class="card">
     <div class="card-title">Step 01 · 输入歌词</div>
-    <div class="card-desc">在左侧粘贴原文歌词，每行一句。中文部分有两种方式：已有满意译文直接粘贴，行数不需要与原文对齐；没有译文则点「AI 翻译」自动生成。</div>
     <div class="lyrics-grid">
       <div class="lyrics-col">
-        <label>原文歌词</label>
-        <textarea id="en-input" placeholder="Shine bright like a diamond&#10;Check my clarity&#10;I'm VVVVS and flawless&#10;...&#10;（空行会自动去除）"></textarea>
+        <label>原文歌词（支持双语交替或纯原文）</label>
+        <textarea id="en-input" placeholder="① 双语交替（自动拆分）&#10;Shine bright like a diamond&#10;像钻石一样闪闪发光&#10;Check my clarity&#10;看看我的纯净度&#10;&#10;② 纯原文（AI 翻译）&#10;Shine bright like a diamond&#10;Check my clarity"></textarea>
         <div class="line-count" id="en-count">0 行</div>
       </div>
       <div class="lyrics-col">
         <label>中文歌词</label>
-        <textarea id="zh-input" placeholder="像钻石一样闪闪发光&#10;看看我的纯净度&#10;是 VVVVS 级别 完美无瑕&#10;...&#10;（行数不对齐可点「AI 对齐行数」）"></textarea>
+        <textarea id="zh-input" placeholder="不满意 AI 翻译？&#10;粘入自己的译文，点「AI 对齐行数」自动匹配原文"></textarea>
         <div class="line-count" id="zh-count">0 行</div>
       </div>
     </div>
