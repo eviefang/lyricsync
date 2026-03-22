@@ -23,7 +23,11 @@ export default async function handler(req, res) {
     if (data.error) {
       return res.status(500).json({ error: data.error.message });
     }
-    const text = data.choices[0].message.content;
+    const message = data.choices[0].message;
+    const text = message.content || message.reasoning_content || '';
+    if (!text) {
+      return res.status(500).json({ error: '模型返回内容为空，请重试', debug: JSON.stringify(data) });
+    }
     return res.status(200).json({ result: text });
   } catch (err) {
     return res.status(500).json({ error: err.message });
