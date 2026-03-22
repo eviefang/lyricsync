@@ -801,14 +801,11 @@
         <div class="custom-progress-bar" id="audio-progress"></div>
       </div>
       <span class="custom-time" id="audio-time">0:00 / 0:00</span>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
-        <div style="display:flex;gap:6px;align-items:center;">
-          <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em;">速度</span>
-          <button class="speed-btn" id="speed-05" onclick="setSpeed(0.5)">0.5×</button>
-          <button class="speed-btn" id="speed-075" onclick="setSpeed(0.75)">0.75×</button>
-          <button class="speed-btn active" id="speed-1" onclick="setSpeed(1)">1×</button>
-        </div>
-        <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);opacity:0.6;letter-spacing:0.04em;">歌词太快跟不上？降低速度再打轴</span>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+        <span style="font-family:ui-monospace,monospace;font-size:10px;color:var(--muted);">速度</span>
+        <button class="speed-btn" id="speed-05" onclick="setSpeed(0.5)">0.5×</button>
+        <button class="speed-btn" id="speed-075" onclick="setSpeed(0.75)">0.75×</button>
+        <button class="speed-btn active" id="speed-1" onclick="setSpeed(1)">1×</button>
       </div>
     </div>
     <audio id="player2" style="display:none;"></audio>
