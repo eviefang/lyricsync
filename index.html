@@ -732,7 +732,7 @@
         </div>
         <div class="example-card" onclick="loadExample('original')">
           <div class="example-card-label">方式二 · 纯原文 + AI 翻译</div>
-          <div class="example-card-desc">只有原文歌词，粘入左侧后点「翻译」自动生成对应中文</div>
+          <div class="example-card-desc">只有原文歌词，粘入左侧后点「AI 翻译」自动生成中文</div>
           <div class="example-preview">
             <span class="ep-en">I try to keep my cool but</span>
             <span class="ep-en">My life turns in slow motion</span>
@@ -815,7 +815,7 @@
     <div class="progress-fill" id="progress-fill" style="width:0%"></div>
   </div>
 
-  <div class="now-card" id="now-card">
+  <div class="now-card" id="now-card" onclick="markTimestamp()" style="cursor:pointer;">
     <div class="line-badge" id="line-badge">1 / ?</div>
 
     <div class="next-block" id="prev-block" style="display:none">
@@ -825,14 +825,13 @@
     </div>
 
     <div class="current-block">
-      <div class="block-label">▶ 当前句 — 唱完按 J 打点</div>
+      <div class="block-label">▶ 当前句 — 唱完按 J 或点击此处打点</div>
       <div class="current-en" id="current-en">—</div>
       <div class="current-zh" id="current-zh">—</div>
     </div>
 
     <div class="key-hint">
-      按 <span class="key" id="enter-key">J</span> 标记当前句开始时间
-      &nbsp;·&nbsp; 空格 = 播放 / 暂停
+      按 <span class="key" id="enter-key">J</span> 或点击此区域 &nbsp;·&nbsp; 空格 = 播放 / 暂停
     </div>
   </div>
 
