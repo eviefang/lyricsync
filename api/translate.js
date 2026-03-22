@@ -17,6 +17,7 @@ export default async function handler(req, res) {
         model: 'glm-4.7-flash',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }],
+        thinking: { type: 'disabled' },
       }),
     });
     const data = await response.json();
