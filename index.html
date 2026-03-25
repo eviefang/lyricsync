@@ -722,10 +722,10 @@
           <div class="example-card-label">方式一 · 双语交替</div>
           <div class="example-card-desc">从音乐 App 复制的中英双语歌词，直接粘入左侧，自动拆分</div>
           <div class="example-preview">
-            <span class="ep-en">I try to keep my cool but</span>
-            <span class="ep-zh">我努力保持冷静但是</span>
-            <span class="ep-en">My life turns in slow motion</span>
-            <span class="ep-zh">我的生活仿佛转为慢镜</span>
+            <span class="ep-en">Shine bright like a diamond</span>
+            <span class="ep-zh">像钻石一样闪闪发光</span>
+            <span class="ep-en">Life's too short to be shy</span>
+            <span class="ep-zh">人生苦短别用来害羞</span>
             <span class="ep-more">···</span>
           </div>
           <div class="example-card-cta">点击加载示例 →</div>
@@ -734,10 +734,10 @@
           <div class="example-card-label">方式二 · 纯原文 + AI 翻译</div>
           <div class="example-card-desc">只有原文歌词，粘入左侧后点「AI 翻译」自动生成中文</div>
           <div class="example-preview">
-            <span class="ep-en">I try to keep my cool but</span>
-            <span class="ep-en">My life turns in slow motion</span>
-            <span class="ep-en">Bye bye baby blue</span>
-            <span class="ep-en">I wish you could see the wicked truth</span>
+            <span class="ep-en">Shine bright like a diamond</span>
+            <span class="ep-en">Check my clarity, I'm VVVVS and flawless</span>
+            <span class="ep-en">Life's too short to be shy</span>
+            <span class="ep-en">Be your own sunshine</span>
             <span class="ep-more">···</span>
           </div>
           <div class="example-card-cta">点击加载示例 →</div>
@@ -777,6 +777,7 @@
     <div class="card-desc">支持 mp3、m4a、wav、mp4、mov 等格式。建议上传音频文件，视频文件可能在部分浏览器中无法正常读取音轨。</div>
     <div class="audio-row">
       <button class="btn btn-outline" onclick="document.getElementById('audio-file').click()">选择文件</button>
+      <button class="btn btn-ghost" onclick="loadExampleAudio()">导入示例音频</button>
       <input type="file" id="audio-file" accept="audio/*,video/*" style="display:none">
       <span id="file-name">未选择文件</span>
       <audio id="player" controls></audio>
@@ -857,25 +858,76 @@
   const player = document.getElementById('player');
   const player2 = document.getElementById('player2');
 
-  const EXAMPLE_BILINGUAL = `I try to keep my cool but
-我努力保持冷静但是
-My life turns in slow motion
-我的生活仿佛转为慢镜
-Bye bye baby blue
-再见了我那有着婴儿般蓝色眼睛的爱人
-I wish you could see the wicked truth
-希望你能看清这邪恶的真相
-Caught up in a rush it's killing you
-将你卷入的涌动激情会取走你的性命
-Screaming at the sun you blow into
-朝着你突然闯入的烈日尖声喊叫吧`;
+  const EXAMPLE_BILINGUAL = `Shine bright like a diamond
+像钻石一样闪闪发光
+Check my clarity, I'm VVVVS and flawless
+看看我的纯净度 是 VVVVS 级别 完美无瑕
+clearly see that I'm shiner more than a forehead
+看清楚了 我比脑门还要锃亮
+One thing they always said
+大家总挂在嘴边的一句话是
+Life goes on, we grow up, and glow up
+生活还要继续 我们在成长 然后大放异彩
+Just focus on what you want
+只要专注干你想要的就好
+Wanna be, wanna do before you lost your shine (ใช่)
+在失去光芒之前，去成为你想成为的，去做你想做的
+나를 보고 배워 알았어?
+看着我好好学着点 知道吗？
+มันไม่มีไม่ดีหรอก 알았어?
+只要尝试就没坏事 知道吗？
+ฟังในสิ่งที่พี่บอก 알았어?
+听听姐的忠告 知道吗？
+ลองทำทุกวิธีก่อน 알았어?
+先用尽各种方法去试一遍 知道吗？
+Life's too short to be shy
+人生苦短别用来害羞
+Be your own sunshine
+试着成为你自己的阳光吧
+It's okay if you cry
+哭出来也没关系
+ใจเย็นๆ, take your time
+慢慢来 给自己点时间
+Like who will know you
+如果不表达出来 到底谁能懂你？
+If you don't express it?
+（接上行）
+Turning your passion
+把你的热情化作韵脚说出来吧
+Into rhyme and say it
+（接上行）
+How to live in that Heaven
+如何通往那个天堂？
+I be like patient
+我在忍耐中等待
+Nothing is given
+没有什么是理所当然
+And you gotta earn it
+你必须自己去争取`;
 
-  const EXAMPLE_ORIGINAL = `I try to keep my cool but
-My life turns in slow motion
-Bye bye baby blue
-I wish you could see the wicked truth
-Caught up in a rush it's killing you
-Screaming at the sun you blow into`;
+  const EXAMPLE_ORIGINAL = `Shine bright like a diamond
+Check my clarity, I'm VVVVS and flawless
+clearly see that I'm shiner more than a forehead
+One thing they always said
+Life goes on, we grow up, and glow up
+Just focus on what you want
+Wanna be, wanna do before you lost your shine (ใช่)
+나를 보고 배워 알았어?
+มันไม่มีไม่ดีหรอก 알았어?
+ฟังในสิ่งที่พี่บอก 알았어?
+ลองทำทุกวิธีก่อน 알았어?
+Life's too short to be shy
+Be your own sunshine
+It's okay if you cry
+ใจเย็นๆ, take your time
+Like who will know you
+If you don't express it?
+Turning your passion
+Into rhyme and say it
+How to live in that Heaven
+I be like patient
+Nothing is given
+And you gotta earn it`;
 
   function loadExample(type) {
     if (type === 'bilingual') {
@@ -1109,6 +1161,22 @@ ${zh}
     player.src = audioSrc;
     document.getElementById('start-tag-btn').disabled = false;
   });
+
+  async function loadExampleAudio() {
+    try {
+      const res = await fetch('./milli.mp3');
+      if (!res.ok) throw new Error('文件未找到');
+      const blob = await res.blob();
+      const file = new File([blob], 'milli.mp3', { type: 'audio/mpeg' });
+      audioFileName = 'milli';
+      document.getElementById('file-name').textContent = 'milli.mp3';
+      audioSrc = URL.createObjectURL(file);
+      player.src = audioSrc;
+      document.getElementById('start-tag-btn').disabled = false;
+    } catch (e) {
+      alert('示例音频加载失败，请确认 milli.mp3 已放置在同目录下。');
+    }
+  }
 
   // ── TAGGING ───────────────────────────────────────────
   function startTagging() {
